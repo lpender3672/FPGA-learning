@@ -37,7 +37,18 @@ if [ -d "$BUILD_DIR" ]; then
     rm -rf "$BUILD_DIR"
 fi
 
+# Machine-parseable last-line marker (mirrored by sim.ps1).
+on_exit() {
+    rc=$?
+    if [ "$rc" -ne 0 ]; then
+        echo "[result] sim fail: runner exit $rc"
+    fi
+    return $rc
+}
+trap on_exit EXIT
+
 echo "==> [$PROJECT] simulating with verilator"
 source "$VENV_DIR/bin/activate"
 python "$RUNNER"
 echo "==> [$PROJECT] sim PASS"
+echo "[result] sim ok"

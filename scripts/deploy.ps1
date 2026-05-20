@@ -15,6 +15,15 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# Machine-parseable last-line marker for assistants / scripts:
+#   [result] deploy ok                | success
+#   [result] deploy fail: <reason>    | any throw
+trap {
+    Write-Host "[result] deploy fail: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+
 $repoRoot    = Resolve-Path (Join-Path $PSScriptRoot "..")
 $projectDir  = Join-Path $repoRoot $Project
 if (-not (Test-Path $projectDir)) { throw "Project not found: $projectDir" }
@@ -119,3 +128,4 @@ if (Test-Path $testScript) {
 }
 
 Write-Host "==> [$Project] done. Run: ssh $SshHost ./test.sh" -ForegroundColor Green
+Write-Host "[result] deploy ok"

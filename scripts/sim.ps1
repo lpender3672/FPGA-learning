@@ -11,6 +11,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Machine-parseable last-line marker for assistants / scripts:
+#   [result] sim ok                | all tests passed
+#   [result] sim fail: <reason>    | any failure
+trap {
+    Write-Host "[result] sim fail: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+
 if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
     throw "wsl.exe not found. Install WSL with: wsl --install -d Ubuntu"
 }
@@ -33,3 +41,4 @@ if ($Distro) { $wslArgs += @("-d", $Distro) }
 $wslArgs += @("--cd", $wslPath, "--", "bash", "scripts/sim.sh", "-p", $Project)
 & wsl @wslArgs
 if ($LASTEXITCODE -ne 0) { throw "Simulation failed (exit $LASTEXITCODE)" }
+Write-Host "[result] sim ok"
