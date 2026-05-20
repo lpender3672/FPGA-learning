@@ -4,7 +4,7 @@
 create_bd_design "design_1"
 
 # Zynq UltraScale+ Processing System, preset for KV260
-create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:* zynq_ultra_ps_e_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e \
     -config { apply_board_preset "1" } [get_bd_cells zynq_ultra_ps_e_0]
 
@@ -15,7 +15,7 @@ set_property -dict [list \
 ] [get_bd_cells zynq_ultra_ps_e_0]
 
 # AXI GPIO — 32-bit output channel, looped back to the input channel
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:* axi_gpio_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0
 set_property -dict [list \
     CONFIG.C_GPIO_WIDTH  {32} \
     CONFIG.C_GPIO2_WIDTH {32} \
@@ -42,3 +42,36 @@ assign_bd_address -target_address_space /zynq_ultra_ps_e_0/Data \
 regenerate_bd_layout
 save_bd_design
 validate_bd_design
+
+# ---- IP version lockfile ----
+# Vivado happily substitutes newer IP revs without warning. Enforce the
+# exact versions this design was validated against, including indirect
+# cells inserted by apply_bd_automation. To bump after a deliberate
+# review: change the version here and re-test the loopback on hardware.
+set expected_versions [dict create \
+    zynq_ultra_ps_e          3.5 \
+    axi_gpio                 2.0 \
+    axi_interconnect         2.1 \
+    axi_dwidth_converter     2.1 \
+    axi_protocol_converter   2.1 \
+    proc_sys_reset           5.0 \
+]
+
+set mismatches {}
+foreach cell [get_bd_cells -hierarchical] {
+    set vlnv [get_property VLNV $cell]
+    if {[regexp {xilinx\.com:ip:([^:]+):(.+)} $vlnv -> ip_name ip_version]} {
+        if {[dict exists $expected_versions $ip_name]} {
+            set expected [dict get $expected_versions $ip_name]
+            if {$ip_version ne $expected} {
+                lappend mismatches "  $ip_name: expected $expected, got $ip_version  (cell: $cell)"
+            }
+        }
+    }
+}
+if {[llength $mismatches] > 0} {
+    puts "===== IP VERSION DRIFT DETECTED ====="
+    foreach m $mismatches { puts $m }
+    error "Pinned IP versions in bd/design_1.tcl do not match what Vivado generated. Review changes and update the lockfile after re-testing."
+}
+puts "===== IP versions all match lockfile ====="

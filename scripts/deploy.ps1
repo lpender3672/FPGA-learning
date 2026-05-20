@@ -10,7 +10,7 @@ param(
     [Parameter(Mandatory=$true)][string]$Project,
     [switch]$SkipBuild,
     [string]$AppName,
-    [string]$SshHost = "kv260",
+    [string]$SshHost = "ubuntu@kria.tailb8a52e.ts.net",
     [string]$XilinxRoot = "C:\AMDDesignTools\2025.2"
 )
 
@@ -76,8 +76,15 @@ Write-Host "==> [$Project] packaging" -ForegroundColor Cyan
 if (Test-Path $pkgDir) { Remove-Item -Recurse -Force $pkgDir }
 New-Item -ItemType Directory -Path $pkgDir | Out-Null
 Copy-Item (Join-Path $buildDir "design.bit.bin")     (Join-Path $pkgDir "$AppName.bit.bin")
-Copy-Item (Join-Path $projectDir "firmware\pl.dts")  (Join-Path $pkgDir "$AppName.dts")
 Copy-Item (Join-Path $projectDir "firmware\shell.json") $pkgDir
+
+# Rewrite the dts firmware-name to match the deployed .bit.bin. Source dts
+# can use any placeholder (or its own project name); the on-board dtbo MUST
+# reference "<AppName>.bit.bin" or xmutil's FPGA-manager bind step fails
+# with "Load Error: -1".
+$dtsSrc = Get-Content (Join-Path $projectDir "firmware\pl.dts") -Raw
+$dtsOut = [regex]::Replace($dtsSrc, 'firmware-name\s*=\s*"[^"]*"', "firmware-name = `"$AppName.bit.bin`"")
+Set-Content -Path (Join-Path $pkgDir "$AppName.dts") -Value $dtsOut -Encoding ASCII
 
 # 4. Ship to board, compile dtbo there, install, and load
 Write-Host "==> [$Project] deploy to $SshHost" -ForegroundColor Cyan
