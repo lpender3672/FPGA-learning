@@ -1,0 +1,5 @@
+// bootgen input for converting .bit -> .bit.bin
+all:
+{
+    [destination_device = pl] ../build/design.bit
+}

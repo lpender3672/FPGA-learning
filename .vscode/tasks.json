@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Deploy",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile", "-ExecutionPolicy", "Bypass",
+        "-File", "${workspaceFolder}/scripts/deploy.ps1",
+        "-Project", "${input:project}"
+      ],
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "panel": "dedicated", "reveal": "always", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Deploy (skip build)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile", "-ExecutionPolicy", "Bypass",
+        "-File", "${workspaceFolder}/scripts/deploy.ps1",
+        "-Project", "${input:project}", "-SkipBuild"
+      ],
+      "group": "build",
+      "presentation": { "panel": "dedicated", "reveal": "always", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test on board",
+      "type": "shell",
+      "command": "ssh",
+      "args": ["kv260", "./test.sh"],
+      "group": { "kind": "test", "isDefault": true },
+      "presentation": { "panel": "dedicated", "reveal": "always" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Board",
+      "type": "shell",
+      "command": "ssh",
+      "args": ["kv260", "${input:boardAction}"],
+      "presentation": { "panel": "dedicated", "reveal": "always" },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "project",
+      "type": "pickString",
+      "description": "Project to deploy",
+      "options": ["01-blinky"],
+      "default": "01-blinky"
+    },
+    {
+      "id": "boardAction",
+      "type": "pickString",
+      "description": "Board command",
+      "options": [
+        { "label": "list apps",   "value": "sudo xmutil listapps" },
+        { "label": "unload app",  "value": "sudo xmutil unloadapp && sudo xmutil listapps" },
+        { "label": "dmesg tail",  "value": "sudo dmesg | tail -40" },
+        { "label": "fpga state",  "value": "cat /sys/class/fpga_manager/fpga0/state" },
+        { "label": "uptime",      "value": "uptime" },
+        { "label": "shell",       "value": "" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+# ---- Build outputs (one per project subdir) ----
+**/build/
+
+# ---- Vivado ----
+.Xil/
+.Xil_lock/
+*.jou
+*.log
+*.str
+*.pb
+*.rpx
+vivado_*.backup.*
+webtalk*.jou
+webtalk*.log
+hd_visual/
+.cache/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.srcs/
+*.gen/
+
+# ---- Vitis ----
+.metadata/
+RemoteSystemsTempFiles/
+vitis_journal.py
+*.Xil_*
+.analytics
+
+# ---- Bootgen ----
+*.bin.bif
+BOOT.BIN
+
+# ---- Editor / IDE ----
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Python ----
+__pycache__/
+*.pyc
+.venv/
+venv/

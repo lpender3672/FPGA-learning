@@ -1,0 +1,48 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    /* Fragment 0: load the bitstream via the FPGA manager. */
+    fragment@0 {
+        target = <&fpga_full>;
+        overlay0: __overlay__ {
+            #address-cells = <2>;
+            #size-cells = <2>;
+            /* firmware-name MUST match <project>.bit.bin; deploy.ps1
+             * substitutes by copying design.bit.bin to <AppName>.bit.bin. */
+            firmware-name = "PROJECT_NAME.bit.bin";
+            resets = <&zynqmp_reset 116>, <&zynqmp_reset 117>,
+                     <&zynqmp_reset 118>, <&zynqmp_reset 119>;
+        };
+    };
+
+    /* Fragment 1: declare PL devices so Linux binds drivers. */
+    fragment@1 {
+        target = <&amba>;
+        overlay1: __overlay__ {
+            #address-cells = <2>;
+            #size-cells = <2>;
+
+            /* Enable PL_CLK0 (PS clock 71 = PL0_REF). Required: without
+             * this, the AXI fabric has no clock and writes hang the CPU. */
+            clocking0: clocking@0 {
+                compatible = "xlnx,fclk";
+                #clock-cells = <0>;
+                clocks = <&zynqmp_clk 71>;
+                assigned-clocks = <&zynqmp_clk 71>;
+                assigned-clock-rates = <99999000>;
+                clock-output-names = "fabric_clk";
+            };
+
+            misc_clk_0: misc_clk_0 {
+                compatible = "fixed-clock";
+                #clock-cells = <0>;
+                clock-frequency = <99999000>;
+            };
+
+            /* TODO: declare your AXI peripheral nodes here. Each one
+             * needs `clocks = <&misc_clk_0>;` so its driver enables the
+             * fabric clock before touching registers. */
+        };
+    };
+};

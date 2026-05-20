@@ -1,0 +1,6 @@
+// bootgen input for converting .bit -> .bit.bin
+// Used as: bootgen -arch zynqmp -process_bitstream bin -image firmware/design.bif
+all:
+{
+    [destination_device = pl] ../build/design.bit
+}

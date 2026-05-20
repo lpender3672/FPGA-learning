@@ -1,0 +1,68 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    /* Fragment 0: load the bitstream via the FPGA manager.
+     * Target &fpga_full -> resolved at apply time to the base DT's
+     * fpga_full label. xmutil reads firmware-name from this fragment
+     * and feeds the .bit.bin to /sys/class/fpga_manager. */
+    fragment@0 {
+        target = <&fpga_full>;
+        overlay0: __overlay__ {
+            #address-cells = <2>;
+            #size-cells = <2>;
+            firmware-name = "kv260-blinky.bit.bin";
+            /* Pulse PL0..PL3 resets after the bitstream is in. */
+            resets = <&zynqmp_reset 116>, <&zynqmp_reset 117>,
+                     <&zynqmp_reset 118>, <&zynqmp_reset 119>;
+        };
+    };
+
+    /* Fragment 1: declare the PL devices on the amba bus so Linux
+     * binds drivers to them. */
+    fragment@1 {
+        target = <&amba>;
+        overlay1: __overlay__ {
+            #address-cells = <2>;
+            #size-cells = <2>;
+
+            /* Enable PL_CLK0 (PS clock index 71 = PL0_REF on Zynq US+). */
+            clocking0: clocking@0 {
+                compatible = "xlnx,fclk";
+                #clock-cells = <0>;
+                clocks = <&zynqmp_clk 71>;
+                assigned-clocks = <&zynqmp_clk 71>;
+                assigned-clock-rates = <99999000>;
+                clock-output-names = "fabric_clk";
+            };
+
+            /* Fixed-clock proxy so the AXI GPIO driver attaches to it. */
+            misc_clk_0: misc_clk_0 {
+                compatible = "fixed-clock";
+                #clock-cells = <0>;
+                clock-frequency = <99999000>;
+            };
+
+            axi_gpio_0: gpio@a0000000 {
+                compatible = "xlnx,axi-gpio-2.0", "xlnx,xps-gpio-1.00.a";
+                reg = <0x0 0xa0000000 0x0 0x10000>;
+                clocks = <&misc_clk_0>;
+                clock-names = "s_axi_aclk";
+                gpio-controller;
+                #gpio-cells = <3>;
+                xlnx,all-inputs    = <0x0>;
+                xlnx,all-outputs   = <0x1>;
+                xlnx,all-inputs-2  = <0x1>;
+                xlnx,all-outputs-2 = <0x0>;
+                xlnx,is-dual       = <0x1>;
+                xlnx,gpio-width    = <0x20>;
+                xlnx,gpio2-width   = <0x20>;
+                xlnx,dout-default  = <0x0>;
+                xlnx,dout-default-2 = <0x0>;
+                xlnx,tri-default   = <0xffffffff>;
+                xlnx,tri-default-2 = <0xffffffff>;
+                xlnx,interrupt-present = <0x0>;
+            };
+        };
+    };
+};
