@@ -28,11 +28,35 @@
       "problemMatcher": []
     },
     {
+      "label": "Simulate",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile", "-ExecutionPolicy", "Bypass",
+        "-File", "${workspaceFolder}/scripts/sim.ps1",
+        "-Project", "${input:project}"
+      ],
+      "group": { "kind": "test", "isDefault": true },
+      "presentation": { "panel": "dedicated", "reveal": "always", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup sim (venv + cocotb)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile", "-ExecutionPolicy", "Bypass",
+        "-File", "${workspaceFolder}/scripts/setup-sim.ps1"
+      ],
+      "presentation": { "panel": "dedicated", "reveal": "always", "clear": true },
+      "problemMatcher": []
+    },
+    {
       "label": "Test on board",
       "type": "shell",
       "command": "ssh",
       "args": ["kv260", "./test.sh"],
-      "group": { "kind": "test", "isDefault": true },
+      "group": "test",
       "presentation": { "panel": "dedicated", "reveal": "always" },
       "problemMatcher": []
     },

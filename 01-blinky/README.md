@@ -30,6 +30,17 @@ A write to `0xA0000000` should be visible at `0xA0000008` on the next read.
 ssh kv260 ./test.sh
 ```
 
+## Simulation
+
+```powershell
+..\scripts\sim.ps1 -Project 01-blinky
+```
+
+The deployed BD uses Xilinx's AXI GPIO IP directly, so the cocotb
+testbench currently runs against a placeholder DUT (`example_counter.sv`)
+that's NOT in the synthesised design — it exists only to exercise the
+sim flow end-to-end. Replace with real RTL when you add custom logic.
+
 Expected output:
 ```
 Writing 0xDEADBEEF to 0xA0000000

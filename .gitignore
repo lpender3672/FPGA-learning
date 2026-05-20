@@ -49,3 +49,16 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# ---- Simulation outputs ----
+.verilator-build/
+**/sim_build/
+**/results.xml
+**/dump.fst
+**/dump.vcd
+**/*.wdb
+**/xsim.dir/
+xelab.pb
+xvlog.pb
+xvhdl.pb
+*.log.xml
