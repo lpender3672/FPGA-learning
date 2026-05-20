@@ -2,7 +2,8 @@
 # Sourced by scripts/deploy.ps1 from the project root, so all paths here
 # are relative to the project dir (./hw, ./build, etc).
 
-set proj_name   design
+# Derive from directory name; hyphens → underscores (Vivado dislikes hyphens).
+set proj_name   [string map {- _} [file tail [file normalize .]]]
 set proj_dir    [file normalize ./build/vivado]
 set part        xck26-sfvc784-2LV-c
 set board       xilinx.com:kv260_som:part0:1.4

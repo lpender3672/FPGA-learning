@@ -97,6 +97,8 @@ Set-Content -Path (Join-Path $pkgDir "$AppName.dts") -Value $dtsOut -Encoding AS
 
 # 4. Ship to board, compile dtbo there, install, and load
 Write-Host "==> [$Project] deploy to $SshHost" -ForegroundColor Cyan
+& ssh -o ConnectTimeout=5 -o BatchMode=yes $SshHost "true"
+if ($LASTEXITCODE -ne 0) { throw "Cannot reach $SshHost - check network / Tailscale" }
 & ssh $SshHost "rm -rf /tmp/$AppName"
 & scp -r $pkgDir "${SshHost}:/tmp/$AppName"
 if ($LASTEXITCODE -ne 0) { throw "scp failed" }

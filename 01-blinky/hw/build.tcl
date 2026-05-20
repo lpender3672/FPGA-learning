@@ -1,8 +1,9 @@
-# Vivado batch build for kv260-blinky.
+# Vivado batch build for 01-blinky.
 # Run from project root:
 #   vivado -mode batch -source hw/build.tcl
 
-set proj_name   kv260_blinky
+# Derive from directory name; hyphens → underscores (Vivado dislikes hyphens).
+set proj_name   [string map {- _} [file tail [file normalize .]]]
 set proj_dir    [file normalize ./build/vivado]
 set part        xck26-sfvc784-2LV-c
 set board       xilinx.com:kv260_som:part0:1.4
